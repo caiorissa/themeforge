@@ -134,6 +134,8 @@
     const s = stateFromControls();
     const vars = computeTheme(s);
     renderTheme(vars);
+    document.body.dataset.grain = s.grain ? 'on' : 'off';
+    document.body.dataset.motion = s.motion ? 'on' : 'off';
     saveState(s);
   }
 
@@ -320,7 +322,20 @@
     document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
-      if (t[key]) el.textContent = t[key];
+      if (!t[key]) return;
+
+      const valueSpan = el.querySelector(":scope > span");
+      if (!valueSpan) {
+        el.textContent = t[key];
+        return;
+      }
+
+      const labelText = Array.from(el.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+      if (labelText) {
+        labelText.textContent = `${t[key]} `;
+      } else {
+        el.insertBefore(document.createTextNode(`${t[key]} `), valueSpan);
+      }
     });
     localStorage.setItem("lang-themeforge", lang);
   }
